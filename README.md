@@ -121,9 +121,6 @@ To delete all tasks and reset the database, run:
 task reset
 ```
 
-| Parameter | Type | Required | Description | Default |
-| :--- | :---: | :---: | :--- | :--- |
-| title | string | no | this is name of dog | - |
 
 ## ✅ Contributing
 
