@@ -121,6 +121,7 @@ To delete all tasks and reset the database, run:
 task reset
 ```
 
+
 ## ✅ Contributing
 
 Feel free to contribute by submitting pull requests or reporting issues!
