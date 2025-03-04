@@ -1,14 +1,15 @@
-import sqlite3
-from config import DB_PATH
 import random
+import sqlite3
 from datetime import datetime, timedelta
+
+from config import DB_PATH
 
 GREETINGS = [
     "🌟 Welcome back! Ready to conquer the day? 🚀",
     "👋 Hello there! What’s on the agenda today? 📝",
     "🎯 New day, new goals! Let’s make it productive! 💪",
     "☕ Grab a coffee, take a deep breath, and let’s get started! 🌿",
-    "🔄 Another day, another chance to achieve something great! 🌍"
+    "🔄 Another day, another chance to achieve something great! 🌍",
 ]
 
 NO_TASK_MESSAGES = [
@@ -16,8 +17,9 @@ NO_TASK_MESSAGES = [
     "🚀 All tasks completed! Maybe add some new goals? 📝",
     "🎯 You're all caught up! What's next on your list? 🤔",
     "🔥 No tasks left! Now's a great time to learn something new. 📚",
-    "🏆 No tasks? You deserve a break! ☕"
+    "🏆 No tasks? You deserve a break! ☕",
 ]
+
 
 def add_task(task, due_date=None):
     conn = sqlite3.connect(DB_PATH)
@@ -32,15 +34,18 @@ def add_task(task, due_date=None):
     print("✅ Task added!")
     print("\n")
 
+
 def list_tasks():
     conn = sqlite3.connect(DB_PATH)
     print("\n" + "=" * 50)
     print("📌 PENDING TASKS".center(50))
     print("=" * 50)
-    
+
     print(random.choice(GREETINGS))
     c = conn.cursor()
-    c.execute("SELECT id, task, due_date, created_at FROM tasks WHERE status = 'pending' ORDER BY created_at ASC")
+    c.execute(
+        "SELECT id, task, due_date, created_at FROM tasks WHERE status = 'pending' ORDER BY created_at ASC"
+    )
     tasks = c.fetchall()
     conn.close()
 
@@ -53,14 +58,20 @@ def list_tasks():
             print(f"{task[0]:<5} {task[1]:<40} {task[2] if task[2] else 'No due date'}")
     print("\n")
 
+
 def complete_task(task_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("UPDATE tasks SET status='completed' WHERE id=?", (task_id,))
+    completed_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute(
+        """UPDATE tasks SET status='completed', completed_at=? WHERE id=? """,
+        (completed_at, task_id),
+    )
     conn.commit()
     conn.close()
     print("✅ Task marked as completed!")
     print("\n")
+
 
 def delete_task(task_id):
     conn = sqlite3.connect(DB_PATH)
@@ -72,12 +83,11 @@ def delete_task(task_id):
     print("\n")
 
 
-
 def get_completed_tasks(filter_type="today"):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     today = datetime.today().date()
-    
+
     filters = {
         "today": f"DATE(completed_at) = '{today}'",
         "yesterday": f"DATE(completed_at) = '{today - timedelta(days=1)}'",
@@ -86,27 +96,27 @@ def get_completed_tasks(filter_type="today"):
         "year": f"strftime('%Y', completed_at) = '{today.strftime('%Y')}'",
         "all": "1=1",
     }
-    
+
     if filter_type not in filters:
         print("❌ Invalid filter! Use: today, yesterday, week, month, or year.")
         return
-    
-    print('filter_type:', filters[filter_type])
+
+    print("filter_type:", filters[filter_type])
     query = f"""
         SELECT id, task, created_at, completed_at 
         FROM tasks 
         WHERE status = 'completed' AND {filters[filter_type]} 
         ORDER BY completed_at DESC
     """
-    
+
     cursor.execute(query)
     tasks = cursor.fetchall()
     conn.close()
-    
+
     print("\n" + "=" * 80)
     print(f"✅ TASKS COMPLETED {filter_type.upper()}".center(80))
     print("=" * 80)
-    
+
     if not tasks:
         print("\n🎉 No completed tasks for this period!\n")
     else:
@@ -114,16 +124,18 @@ def get_completed_tasks(filter_type="today"):
             print(f"👉 {task[1]}   | 📅 Created: {task[2]} | ✅ Completed: {task[3]}")
     print("\n")
 
+
 def reset_database():
     """Deletes all tasks and resets the database."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    
+
     # Drop the table if it exists
     c.execute("DROP TABLE IF EXISTS tasks")
 
     # Recreate the tasks table
-    c.execute('''
+    c.execute(
+        """
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task TEXT NOT NULL,
@@ -132,9 +144,11 @@ def reset_database():
             completed_at TIMESTAMP DEFAULT NULL,
             status TEXT DEFAULT 'pending'
         )
-    ''')
+    """
+    )
 
     conn.commit()
     conn.close()
     print("✅ Database has been reset!")
     print("\n")
+
