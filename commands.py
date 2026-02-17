@@ -35,16 +35,52 @@ def add_task(task, due_date=None):
     print("\n")
 
 
-def list_tasks():
+def list_tasks(filter_type=None):
     conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    title = filter_type.upper() if filter_type else "ALL"
+    today = datetime.today().date()
     print("\n" + "=" * 50)
-    print("📌 PENDING TASKS".center(50))
+    print(f"📌 {title} PENDING TASKS".center(50))
     print("=" * 50)
+    if (filter_type):
+        filters = {
+            "today": f"DATE(created_at) = '{today}'",
+            "yesterday": f"DATE(created_at) = '{today - timedelta(days=1)}'",
+            "week": f"DATE(created_at) >= '{today - timedelta(days=today.weekday())}'",
+            "month": f"strftime('%Y-%m', created_at) = '{today.strftime('%Y-%m')}'",
+            "year": f"strftime('%Y', created_at) = '{today.strftime('%Y')}'",
+            "all": "1=1",
+        }
+
+        if filter_type not in filters:
+            print("❌ Invalid filter! Use: today, yesterday, week, month, or year.")
+            return
+        query = f"""
+          SELECT id, task, created_at, completed_at
+          FROM tasks
+          WHERE status = 'pending' AND {filters[filter_type]}
+          ORDER BY created_at DESC
+        """
+
+        cursor.execute(query)
+        tasks = cursor.fetchall()
+        conn.close()
+        if not tasks:
+            print(random.choice(NO_TASK_MESSAGES))
+        else:
+            print(f"{'ID':<5} {'TASK':<40} {'DUE DATE'}")
+            print("-" * 60)
+            for task in tasks:
+                print(f"{task[0]:<5} {task[1]:<40} {
+                      task[2] if task[2] else 'No due date'}")
+                print("\n")
+        return
 
     print(random.choice(GREETINGS))
     c = conn.cursor()
     c.execute(
-        "SELECT id, task, due_date, created_at FROM tasks WHERE status = 'pending' ORDER BY created_at ASC"
+        "SELECT id, task, due_date, created_at FROM tasks WHERE status = 'pending'"
     )
     tasks = c.fetchall()
     conn.close()
@@ -55,7 +91,8 @@ def list_tasks():
         print(f"{'ID':<5} {'TASK':<40} {'DUE DATE'}")
         print("-" * 60)
         for task in tasks:
-            print(f"{task[0]:<5} {task[1]:<40} {task[2] if task[2] else 'No due date'}")
+            print(f"{task[0]:<5} {task[1]:<40} {
+                  task[2] if task[2] else 'No due date'}")
     print("\n")
 
 
@@ -103,9 +140,9 @@ def get_completed_tasks(filter_type="today"):
 
     print("filter_type:", filters[filter_type])
     query = f"""
-        SELECT id, task, created_at, completed_at 
-        FROM tasks 
-        WHERE status = 'completed' AND {filters[filter_type]} 
+        SELECT id, task, created_at, completed_at
+        FROM tasks
+        WHERE status = 'completed' AND {filters[filter_type]}
         ORDER BY completed_at DESC
     """
 
@@ -121,7 +158,8 @@ def get_completed_tasks(filter_type="today"):
         print("\n🎉 No completed tasks for this period!\n")
     else:
         for task in tasks:
-            print(f"👉 {task[1]}   | 📅 Created: {task[2]} | ✅ Completed: {task[3]}")
+            print(f"👉 {task[1]}   | 📅 Created: {
+                  task[2]} | ✅ Completed: {task[3]}")
     print("\n")
 
 
@@ -151,4 +189,3 @@ def reset_database():
     conn.close()
     print("✅ Database has been reset!")
     print("\n")
-

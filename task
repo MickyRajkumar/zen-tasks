@@ -19,7 +19,8 @@ sys.stdout.reconfigure(encoding="utf-8")
 def main():
     init_db()
     parser = argparse.ArgumentParser(description="📝 Task MANAGER CLI")
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(
+        dest="command", help="Available commands")
 
     add_parser = subparsers.add_parser("add", help="Add a new task")
     add_parser.add_argument("task", type=str, help="Task description")
@@ -27,12 +28,21 @@ def main():
         "--due", type=str, help="Due date (YYYY-MM-DD HH:MM)", default=None
     )
 
-    subparsers.add_parser("list", help="List all pending tasks")
+    list_parser = subparsers.add_parser("list", help="List all pending tasks")
+    list_parser.add_argument(
+        "filter",
+        choices=["today", "yesterday", "week", "month", "year", "all"],
+        help="Filter tasks by time (default: today)",
+        default="today",
+        nargs="?",
+    )
 
-    complete_parser = subparsers.add_parser("done", help="Mark a task as completed")
+    complete_parser = subparsers.add_parser(
+        "done", help="Mark a task as completed")
     complete_parser.add_argument("task_id", type=int, help="Task ID")
 
-    done_parser = subparsers.add_parser("completed", help="Show completed tasks")
+    done_parser = subparsers.add_parser(
+        "completed", help="Show completed tasks")
     done_parser.add_argument(
         "filter",
         choices=["today", "yesterday", "week", "month", "year", "all"],
@@ -44,7 +54,8 @@ def main():
     delete_parser = subparsers.add_parser("delete", help="Delete a task")
     delete_parser.add_argument("task_id", type=int, help="Task ID")
 
-    subparsers.add_parser("reset", help="Reset the database (delete all tasks)")
+    subparsers.add_parser(
+        "reset", help="Reset the database (delete all tasks)")
 
     args = parser.parse_args()
 
@@ -53,7 +64,7 @@ def main():
     elif args.command == "completed":
         get_completed_tasks(args.filter)
     elif args.command == "list":
-        list_tasks()
+        list_tasks(args.filter)
     elif args.command == "done":
         complete_task(args.task_id)
     elif args.command == "delete":
