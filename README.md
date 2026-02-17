@@ -16,8 +16,8 @@ A simple task reminder application for Windows and Linux terminals using SQLite.
 1. **Clone the [repository](https://github.com/MickyRajkumar/task-manager):**
 
    ```sh
-   git clone https://github.com/MickyRajkumar/task-manager.git
-   cd task-reminder-cli
+   git clone https://github.com/MickyRajkumar/zen-tasks.git
+   cd zen-tasks
    ```
 
 2. **Ensure Python is installed:**
@@ -51,7 +51,7 @@ A simple task reminder application for Windows and Linux terminals using SQLite.
 
    ```sh
    git clone https://github.com/MickyRajkumar/task-manager.git
-   cd task-reminder-cli
+   cd zen-tasks
    ```
 
 2. **Ensure Python is installed:**
